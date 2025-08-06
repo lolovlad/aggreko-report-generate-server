@@ -2,6 +2,8 @@ from pydantic import BaseModel, UUID4, field_serializer
 from datetime import datetime
 from .Mixins import DeleteMixinModel, SystemVariablesMixin
 
+from typing import Optional
+
 
 class Profession(SystemVariablesMixin):
     pass
@@ -22,7 +24,7 @@ class UserBase(BaseModel):
     surname: str | None
     patronymic: str | None
     id_profession: int | None
-    painting: str | None
+    painting: Optional[str | None] = None
 
 
 class UserGet(UserBase):
