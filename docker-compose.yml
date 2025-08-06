@@ -1,0 +1,65 @@
+services:
+  #web:
+  #  container_name: nginx-python
+  #  image: nginx:latest
+  #  depends_on:
+  #    - app
+  #  ports:
+  #    - 8085:80
+  #    - 8082:443
+  #  volumes:
+  #    - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+  #    - /etc/ssl/certs/cloud_aggreko.crt:/etc/nginx/ssl/certs/cloud_aggreko.crt
+  #    - /etc/ssl/private/cloud_aggreko.key:/etc/nginx/ssl/private/cloud_aggreko.key
+  #  networks:
+  #    - default
+  #app:
+  #  build:
+  #    context: .
+  #    dockerfile: Dockerfile
+  #  container_name: app_document
+  #  ports:
+  #    - 9999:8000
+  #  command: [ "/app/docker/app.sh" ]
+  #  env_file:
+  #    - .env-deploy
+
+  db-main:
+    image: postgres:latest
+    container_name: db_aggreco_report
+    restart: always
+    expose:
+      - 5435
+    ports:
+      - 5435:5435
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data/postgres/pgdata:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
+
+  pgadmin:
+    container_name: pgadmin_aggreco_report
+    image: dpage/pgadmin4:latest
+    restart: always
+    depends_on:
+      - db-main
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+
+  minio:
+    container_name: files_s3_aggreco_report
+    image: minio/minio:latest
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./data/minio:/data
+    env_file:
+      - .env
+    command: server --console-address ":9001" /data
