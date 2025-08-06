@@ -62,4 +62,4 @@ services:
       - ./data/minio:/data
     env_file:
       - .env-deploy
-    command: server --console-address ":9996" /data
+    command: server --console-address ":9001" /data
