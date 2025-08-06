@@ -1,6 +1,6 @@
 services:
   web:
-    container_name: nginx-python
+    container_name: nginx-python-report
     image: nginx:latest
     depends_on:
       - app
@@ -17,7 +17,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: app_document
+    container_name: app_document-report
     ports:
       - 9992:8000
     command: [ "/app/docker/app.sh" ]
