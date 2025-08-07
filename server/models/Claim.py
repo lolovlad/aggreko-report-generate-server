@@ -25,13 +25,15 @@ class GetClaim(BaseClaim):
     @computed_field
     @property
     def download_link_main(self) -> str:
-        return f"http://{settings.minio_host}:{settings.minio_port}/report/{self.main_document}"
+        m = self.main_document.replace("\\", "/")
+        return f"http://{settings.host_server}:{settings.port_server}/v1/file/?name_file=report/{m}"
 
     @computed_field
     @property
     def download_link_edit(self) -> str | None:
         if self.edit_document is not None:
-            return f"http://{settings.minio_host}:{settings.minio_port}/report/{self.edit_document}"
+            m = self.edit_document.replace("\\", "/")
+            return f"http://{settings.host_server}:{settings.port_server}/v1/file/?name_file=report/{m}"
         else:
             return None
 

@@ -34,12 +34,14 @@ class GetBlueprint(BaseBlueprint):
     @computed_field
     @property
     def download_link(self) -> str:
-        return f"http://{settings.minio_host}:{settings.minio_port}/blueprint/{self.path_form_xlsx_file}"
+        m = self.path_form_xlsx_file.replace("\\", "/")
+        return f"http://{settings.host_server}:{settings.port_server}/v1/file/?name_file=blueprint/{m}"
 
     @computed_field
     @property
     def download_link_docx(self) -> str:
-        return f"http://{settings.minio_host}:{settings.minio_port}/blueprint/{self.path_template_docx_file}"
+        m = self.path_template_docx_file.replace("\\", "/")
+        return f"http://{settings.host_server}:{settings.port_server}/v1/file/?name_file=blueprint/{m}"
 
     @field_serializer('uuid')
     def serialize_uuid(self, uuid: UUID4, _info):
