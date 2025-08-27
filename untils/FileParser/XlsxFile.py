@@ -2,6 +2,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.styles.borders import Border, Side
 from openpyxl.styles import PatternFill
+from openpyxl.cell.cell import MergedCell
 
 from .File import File
 from pathlib import Path
@@ -12,6 +13,7 @@ from .JsonFile import JsonFile
 
 from re import findall
 from io import BytesIO
+from copy import deepcopy, copy
 
 
 class XlsxFile(File):
@@ -36,8 +38,12 @@ class XlsxFile(File):
     def map_data(self):
         return self.__map_data
 
-    def read_file(self):
-        self._file = load_workbook(self.__buffer, data_only=True)
+    @property
+    def active_sheet(self):
+        return self.__active_sheet
+
+    def read_file(self, data_only: bool = True):
+        self._file = load_workbook(self.__buffer, data_only=data_only)
 
     def render(self, schemas: dict):
         pass
@@ -96,3 +102,70 @@ class XlsxFile(File):
     def get_text_in_cell(self, text) -> str:
         text_list = findall(r"\w+", text)
         return text_list[0]
+
+    def copy_sheet(self, name_sheet: str, target_file):
+
+        self.target_sheet_by_name(name_sheet)
+        target_file.target_sheet_by_name(name_sheet)
+        self.__copy_cells(self.__active_sheet, target_file.active_sheet)  # copy all the cel values and styles
+        self.__copy_sheet_attributes(self.__active_sheet, target_file.active_sheet)
+
+    def __copy_sheet_attributes(self, source_sheet, target_sheet):
+        from copy import copy
+
+        target_sheet.sheet_format = copy(source_sheet.sheet_format)
+        target_sheet.sheet_properties = copy(source_sheet.sheet_properties)
+        target_sheet.page_margins = copy(source_sheet.page_margins)
+        target_sheet.freeze_panes = copy(source_sheet.freeze_panes)
+        target_sheet.print_options = copy(source_sheet.print_options)
+        target_sheet.protection = copy(source_sheet.protection)
+        target_sheet.sheet_state = copy(source_sheet.sheet_state)
+        target_sheet.views = copy(source_sheet.views)
+        target_sheet.data_validations = copy(source_sheet.data_validations)
+
+        # ширина по умолчанию
+        if source_sheet.sheet_format.defaultColWidth is not None:
+            target_sheet.sheet_format.defaultColWidth = copy(source_sheet.sheet_format.defaultColWidth)
+
+        # копируем размеры строк
+        for row_idx, row_dim in source_sheet.row_dimensions.items():
+            target_sheet.row_dimensions[row_idx].height = row_dim.height
+            target_sheet.row_dimensions[row_idx].hidden = row_dim.hidden
+
+        # копируем размеры колонок
+        for col, col_dim in source_sheet.column_dimensions.items():
+            target_dim = target_sheet.column_dimensions[col]
+            target_dim.min = col_dim.min
+            target_dim.max = col_dim.max
+            target_dim.width = col_dim.width
+            target_dim.hidden = col_dim.hidden
+
+    def __copy_cells(self, source_sheet, target_sheet):
+
+        for (row, col), source_cell in source_sheet._cells.items():
+            if isinstance(source_cell, MergedCell):
+                continue
+
+            target_cell = target_sheet.cell(row=row, column=col)
+            target_cell.value = source_cell.value
+            target_cell.data_type = source_cell.data_type
+
+            if source_cell.has_style:
+                target_cell.font = copy(source_cell.font)
+                target_cell.border = copy(source_cell.border)
+                target_cell.fill = copy(source_cell.fill)
+                target_cell.number_format = copy(source_cell.number_format)
+                target_cell.protection = copy(source_cell.protection)
+                target_cell.alignment = copy(source_cell.alignment)
+
+            if source_cell.hyperlink:
+                target_cell._hyperlink = copy(source_cell.hyperlink)
+
+            if source_cell.comment:
+                target_cell.comment = copy(source_cell.comment)
+
+        # объединённые ячейки копируем ТОЛЬКО здесь
+        for merged_range in source_sheet.merged_cells.ranges:
+            target_sheet.merge_cells(str(merged_range))
+
+

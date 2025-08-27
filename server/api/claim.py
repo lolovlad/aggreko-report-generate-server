@@ -4,7 +4,7 @@ from ..functions import access_control
 
 from ..services import get_current_user, ClaimService
 
-from ..models.Claim import GetClaim
+from ..models.Claim import GetClaim, PostClaim, FullOneClaim
 from ..models.Message import Message
 from ..models.User import UserGet
 from untils.Models.Fileschame import FileSchemas
@@ -42,23 +42,35 @@ async def get_page_claim(response: Response,
     return claims
 
 
-@router.post("/{uuid_blueprint}", responses={
+@router.post("/update/main_file/{uuid_claim}", responses={
+    status.HTTP_406_NOT_ACCEPTABLE: {"model": Message},
+    status.HTTP_201_CREATED: {"model": Message},
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": Message}
+})
+@access_control(["admin", "super_admin"])
+async def generate_file_claim(uuid_claim: str,
+                              current_user: UserGet = Depends(get_current_user),
+                              service: ClaimService = Depends()):
+    await service.generate_file_claim(uuid_claim)
+    return JSONResponse(content={"message": "добавлено"},
+                        status_code=status.HTTP_201_CREATED)
+
+
+@router.post("/", responses={
     status.HTTP_406_NOT_ACCEPTABLE: {"model": Message},
     status.HTTP_201_CREATED: {"model": Message},
     status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": Message}
 })
 @access_control(["user"])
-async def create_claim(file_xlsx: UploadFile,
-                       schema: Annotated[str, Form()],
-                       uuid_blueprint: str,
+async def create_claim(data: PostClaim,
                        current_user: UserGet = Depends(get_current_user),
                        service: ClaimService = Depends()):
-    await service.add_claim(uuid_blueprint, schema, current_user.uuid, file_xlsx)
+    await service.add_claim(data, current_user.uuid)
     return JSONResponse(content={"message": "добавлено"},
                         status_code=status.HTTP_201_CREATED)
 
 
-@router.get("/get/{uuid}", response_model=GetClaim, responses={
+@router.get("/get/{uuid}", response_model=FullOneClaim, responses={
                 status.HTTP_406_NOT_ACCEPTABLE: {"model": Message},
                 status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": Message},
 })
@@ -81,6 +93,22 @@ async def update_claim(uuid: str,
                        current_user: UserGet = Depends(get_current_user),
                        service: ClaimService = Depends()):
     await service.update(uuid, file_main, file_edit, comment)
+    return JSONResponse(content={"message": "добавлено"},
+                        status_code=status.HTTP_201_CREATED)
+
+
+@router.post("/update/data/{uuid}", responses={
+    status.HTTP_406_NOT_ACCEPTABLE: {"model": Message},
+    status.HTTP_201_CREATED: {"model": Message},
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": Message}
+})
+async def update_data_claim(uuid: str,
+                            file_xlsx: UploadFile,
+                            schema: Annotated[str, Form()],
+                            protocols: Annotated[str, Form()],
+                            current_user: UserGet = Depends(get_current_user),
+                            service: ClaimService = Depends()):
+    await service.update_data_claim(uuid, schema, protocols, current_user.uuid, file_xlsx)
     return JSONResponse(content={"message": "добавлено"},
                         status_code=status.HTTP_201_CREATED)
 

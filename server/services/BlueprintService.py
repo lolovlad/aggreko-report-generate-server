@@ -124,6 +124,7 @@ class BlueprintService:
         models = FileSchemas.model_validate_json(file_sc)
         for i in range(len(models.protocols)):
             models.protocols[i].tables = []
+            models.protocols[i].system_table = {}
         return models
 
     async def upload_docx(self, uuid: str, file: UploadFile):

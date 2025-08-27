@@ -108,6 +108,18 @@ class TypeEquipment(base, SystemVariablesMixin):
     code: Mapped[str] = mapped_column(unique=True, nullable=False)
 
 
+class Equipment(base, DeleteMixin):
+    __tablename__ = "equipment"
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    uuid: Mapped[str] = mapped_column(UUID(as_uuid=True), unique=True, default=uuid4)
+    name: Mapped[str] = mapped_column(nullable=False)
+    code: Mapped[str] = mapped_column(nullable=True)
+    id_type: Mapped[int] = mapped_column(ForeignKey("type_equipment.id"))
+    type: Mapped[TypeEquipment] = relationship(lazy="joined")
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    characteristics: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+
+
 class StateClaim(base, SystemVariablesMixin):
     __tablename__ = "state_claim"
 
@@ -117,7 +129,8 @@ class Claim(base):
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True), unique=True, default=uuid4)
 
-    datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    name: Mapped[str] = mapped_column(nullable=True, default="template", server_default="template")
+    datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
     id_state_claim: Mapped[int] = mapped_column(ForeignKey("state_claim.id"))
     state_claim: Mapped[StateClaim] = relationship(lazy="joined")
@@ -128,10 +141,16 @@ class Claim(base):
     id_blueprint: Mapped[int] = mapped_column(ForeignKey("blueprint.id"))
     blueprint: Mapped[Blueprint] = relationship(lazy="joined")
 
+    id_equipment: Mapped[int] = mapped_column(ForeignKey("equipment.id"), nullable=True)
+    equipment: Mapped[Equipment] = relationship(lazy="joined")
+
     main_document: Mapped[str] = mapped_column(nullable=True)
 
     edit_document: Mapped[str] = mapped_column(nullable=True)
     comment: Mapped[str] = mapped_column(Text, nullable=True, default="Нет")
+
+    blueprint_xlsx_file: Mapped[str] = mapped_column(nullable=True)
+    blueprint_json_file: Mapped[Optional[dict]] = mapped_column(MutableDict.as_mutable(JSONB), nullable=True)
 
     last_datetime_edit: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                          nullable=False,
@@ -154,16 +173,5 @@ class Device(base):
     date_check_last: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False)
     date_check_next: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=False)
 
-
-class Equipment(base, DeleteMixin):
-    __tablename__ = "equipment"
-    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
-    uuid: Mapped[str] = mapped_column(UUID(as_uuid=True), unique=True, default=uuid4)
-    name: Mapped[str] = mapped_column(nullable=False)
-    code: Mapped[str] = mapped_column(nullable=True)
-    id_type: Mapped[int] = mapped_column(ForeignKey("type_equipment.id"))
-    type: Mapped[TypeEquipment] = relationship(lazy="joined")
-    description: Mapped[str] = mapped_column(Text, nullable=True)
-    characteristics: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
 
 
