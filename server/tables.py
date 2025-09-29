@@ -81,7 +81,7 @@ class TypeEquipmentBlueprint(base, SystemVariablesMixin):
     __tablename__ = "type_equipment_blueprint"
 
 
-class Blueprint(base):
+class Blueprint(base, DeleteMixin):
     __tablename__ = "blueprint"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True), unique=True, default=uuid4)
@@ -124,7 +124,7 @@ class StateClaim(base, SystemVariablesMixin):
     __tablename__ = "state_claim"
 
 
-class Claim(base):
+class Claim(base, DeleteMixin):
     __tablename__ = "claim"
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
     uuid: Mapped[UUID] = mapped_column(UUID(as_uuid=True), unique=True, default=uuid4)

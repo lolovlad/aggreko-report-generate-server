@@ -41,10 +41,19 @@ class ClaimRepository:
         return result.scalars().one()
 
     async def add(self, data: Claim):
-        #try:
-        self.__session.add(data)
-        await self.__session.commit()
-        #except:
-        #    await self.__session.rollback()
-        #    raise Exception
+        try:
+            self.__session.add(data)
+            await self.__session.commit()
+        except:
+            await self.__session.rollback()
+            raise Exception
+
+    async def delete(self, claim: Claim):
+        try:
+            await self.__session.refresh(claim)
+            await self.__session.delete(claim)
+            await self.__session.commit()
+        except:
+            await self.__session.rollback()
+            raise Exception
 

@@ -69,6 +69,7 @@ class BuilderXlsxFile(BuilderFile):
                         self.__file.create_cell(x, y, cell.text)
                 self.add_to_table(id_protocol, id_table, new_cells)
                 last_y_cell = y - 2
+        self.__file.delete_sheet("Sheet")
 
     def add_to_table(self, id_protocol: int, id_table: int, new_cells: list):
         self.__schemas.protocols[id_protocol].tables[id_table].cells = new_cells

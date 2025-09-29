@@ -128,3 +128,21 @@ async def update_claim_state(uuid_claim: str,
     except Exception:
         return JSONResponse(content={"message": "ошибка обновления состояния"},
                             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.delete("/{uuid}",
+               responses={
+                   status.HTTP_406_NOT_ACCEPTABLE: {"model": Message},
+                   status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": Message},
+                   status.HTTP_200_OK: {"model": Message}
+               })
+async def delete_claim(uuid: str,
+                       service: ClaimService = Depends(),
+                       current_user: UserGet = Depends(get_current_user)):
+    try:
+        await service.delete_claim(uuid)
+        return JSONResponse(status_code=status.HTTP_200_OK,
+                            content={"message": "Удалено"})
+    except Exception:
+        return JSONResponse(content={"message": "Ошибка удаления"},
+                            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

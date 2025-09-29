@@ -133,3 +133,8 @@ class BlueprintService:
         await self.__buket_repo.upload_file(blueprint.path_template_docx_file.replace("\\", "/"),
                                             file.file.read(),
                                             "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+
+    async def delete_bluprint(self, uuid_blueprint: str):
+        blueprint = await self.__blueprint_repo.get_by_uuid(uuid_blueprint)
+        blueprint.is_delite = True
+        await self.__blueprint_repo.add(blueprint)

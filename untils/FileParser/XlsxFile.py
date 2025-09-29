@@ -103,8 +103,9 @@ class XlsxFile(File):
         text_list = findall(r"\w+", text)
         return text_list[0]
 
-    def copy_sheet(self, name_sheet: str, target_file):
-
+    def copy_sheet(self, id_sheet: str, target_file):
+        list_sheet = self._file.sheetnames
+        name_sheet = list_sheet[int(id_sheet) - 1]
         self.target_sheet_by_name(name_sheet)
         target_file.target_sheet_by_name(name_sheet)
         self.__copy_cells(self.__active_sheet, target_file.active_sheet)  # copy all the cel values and styles
@@ -164,8 +165,15 @@ class XlsxFile(File):
             if source_cell.comment:
                 target_cell.comment = copy(source_cell.comment)
 
-        # объединённые ячейки копируем ТОЛЬКО здесь
         for merged_range in source_sheet.merged_cells.ranges:
             target_sheet.merge_cells(str(merged_range))
+
+    def get_list_sheet(self) -> list[str]:
+        ls_sheetnames = self._file.sheetnames
+
+        return ls_sheetnames
+
+    def delete_sheet(self, name: str):
+        del self._file[name]
 
 

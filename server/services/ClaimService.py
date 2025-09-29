@@ -257,3 +257,16 @@ class ClaimService:
                     state_claim_model = await self.__env_repo.get_state_claim_by_system_name("under_development")
                 claim.id_state_claim = state_claim_model.id
         await self.__claim_repo.add(claim)
+
+    async def delete_claim(self, uuid: str):
+        claim = await self.__claim_repo.get_by_uuid(uuid)
+        try:
+            if claim.blueprint_xlsx_file:
+                await self.__buket_main_repo.delete_file(claim.blueprint_xlsx_file.replace("\\", "/"))
+            if claim.edit_document:
+                await self.__buket_main_repo.delete_file(claim.edit_document.replace("\\", "/"))
+            if claim.main_document:
+                await self.__buket_main_repo.delete_file(claim.main_document.replace("\\", "/"))
+            await self.__claim_repo.delete(claim)
+        except:
+            raise Exception

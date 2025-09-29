@@ -18,7 +18,6 @@ class BuilderDocxFile(BuilderFile):
     def build(self, map_data_dop: dict):
         self.merge_map_dict()
         self.merge_to_top_map_data(map_data_dop)
-        print(self.__map_data)
         self.__template_path_file.render(self.__map_data)
 
     def merge_map_dict(self):

@@ -11,12 +11,12 @@ class BlueprintRepository:
         self.__session: AsyncSession = session
 
     async def count_row(self) -> int:
-        response = select(func.count(Blueprint.id))
+        response = select(func.count(Blueprint.id)).where(Blueprint.is_delite == False)
         result = await self.__session.execute(response)
         return result.scalars().first()
 
     async def get_limit(self, start: int, count: int) -> list[Blueprint]:
-        response = select(Blueprint).offset(start).fetch(count).order_by(Blueprint.id)
+        response = select(Blueprint).where(Blueprint.is_delite == False).offset(start).fetch(count).order_by(Blueprint.id)
         result = await self.__session.execute(response)
         return result.scalars().all()
 
@@ -28,7 +28,7 @@ class BlueprintRepository:
     async def get_by_search_field(self, name: str) -> list[Blueprint]:
         response = select(Blueprint).where(and_(
             Blueprint.name.ilike(f'%{name}%')
-        )).order_by(Blueprint.id)
+        )).where(Blueprint.is_delite == False).order_by(Blueprint.id)
         result = await self.__session.execute(response)
         return result.scalars().all()
 

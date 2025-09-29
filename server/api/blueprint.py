@@ -94,3 +94,22 @@ async def upload_docx_file(file: UploadFile,
     await service.upload_docx(uuid, file)
     return JSONResponse(content={"message": "Обновлен"},
                         status_code=status.HTTP_205_RESET_CONTENT)
+
+
+@router.delete("/{uuid}",
+               responses={
+                   status.HTTP_406_NOT_ACCEPTABLE: {"model": Message},
+                   status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": Message},
+                   status.HTTP_200_OK: {"model": Message}
+               })
+@access_control(["admin", "super_admin"])
+async def delete_blueprint(uuid: str,
+                           service: BlueprintService = Depends(),
+                           current_user: UserGet = Depends(get_current_user)):
+    try:
+        await service.delete_bluprint(uuid)
+        return JSONResponse(status_code=status.HTTP_200_OK,
+                            content={"message": "Удалено"})
+    except Exception:
+        return JSONResponse(content={"message": "Ошибка удаления"},
+                            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
