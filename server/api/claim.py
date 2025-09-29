@@ -47,7 +47,6 @@ async def get_page_claim(response: Response,
     status.HTTP_201_CREATED: {"model": Message},
     status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": Message}
 })
-@access_control(["admin", "super_admin"])
 async def generate_file_claim(uuid_claim: str,
                               current_user: UserGet = Depends(get_current_user),
                               service: ClaimService = Depends()):
