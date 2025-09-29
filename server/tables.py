@@ -73,11 +73,11 @@ class User(base, DeleteMixin):
         return check_password_hash(self.password_hash, password)
 
 
-class TypeBlueprint(base, SystemVariablesMixin):
+class TypeBlueprint(base, SystemVariablesMixin, DeleteMixin):
     __tablename__ = "type_blueprint"
 
 
-class TypeEquipmentBlueprint(base, SystemVariablesMixin):
+class TypeEquipmentBlueprint(base, SystemVariablesMixin, DeleteMixin):
     __tablename__ = "type_equipment_blueprint"
 
 
@@ -103,7 +103,7 @@ class Blueprint(base, DeleteMixin):
                                                          server_default=func.now())
 
 
-class TypeEquipment(base, SystemVariablesMixin):
+class TypeEquipment(base, SystemVariablesMixin, DeleteMixin):
     __tablename__ = "type_equipment"
     code: Mapped[str] = mapped_column(unique=True, nullable=False)
 

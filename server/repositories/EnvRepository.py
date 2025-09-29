@@ -35,23 +35,6 @@ class EnvRepository:
                 await self.__session.rollback()
                 return False
 
-    '''async def delete_type_equipment(self, id_type_equipment: int) -> bool:
-        response = (select(func.count(Equipment.id))
-                    .where(Equipment.id_type == id_type_equipment))
-        result = await self.__session.execute(response)
-        count = result.scalars().first()
-        if count > 0:
-            return False
-        else:
-            prof = await self.__session.get(TypeEquipment, id_type_equipment)
-            try:
-                await self.__session.delete(prof)
-                await self.__session.commit()
-                return True
-            except:
-                await self.__session.rollback()
-                return False'''
-
     async def add_list_prof_user(self, prof_users: list[Profession]):
         try:
             self.__session.add_all(prof_users)
@@ -107,12 +90,12 @@ class EnvRepository:
             return None
 
     async def get_all_type_blueprint(self) -> list[TypeBlueprint]:
-        response = select(TypeBlueprint)
+        response = select(TypeBlueprint).where(TypeBlueprint.is_delite == False)
         result = await self.__session.execute(response)
         return result.scalars().all()
 
     async def get_all_type_equipment_blueprint(self) -> list[TypeEquipmentBlueprint]:
-        response = select(TypeEquipmentBlueprint)
+        response = select(TypeEquipmentBlueprint).where(TypeEquipmentBlueprint.is_delite == False)
         result = await self.__session.execute(response)
         return result.scalars().all()
 
@@ -125,5 +108,9 @@ class EnvRepository:
         response = select(StateClaim).where(StateClaim.system_name == system_name)
         result = await self.__session.execute(response)
         return result.scalars().one()
+
+    async def get_entity(self, id_entity: int, entity):
+        ent = await self.__session.get(entity, id_entity)
+        return ent
 
 

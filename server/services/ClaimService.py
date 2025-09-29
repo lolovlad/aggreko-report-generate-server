@@ -150,6 +150,9 @@ class ClaimService:
 
         schema = deepcopy(claim.blueprint_json_file)
         schema["date"] = self.parse_date(datetime.now())
+        schema["claim"] = {
+            "name_claim": claim.name
+        }
         for i in range(len(schema["list_workers"])):
             schema["list_workers"][i]["painting"] = await self.__get_img(schema["list_workers"][i]["painting"])
 
@@ -168,7 +171,7 @@ class ClaimService:
         buffer = BytesIO()
         builder.file.save(buffer)
         buffer.seek(0)
-        name_file_docx = Path(str(claim.uuid), "Основной_документ.docx")
+        name_file_docx = Path(str(claim.uuid), f"Основной_документ_{claim.name}.docx")
 
         await self.__buket_main_repo.upload_file(str(name_file_docx).replace('\\', '/'),
                                                  buffer.getvalue(),

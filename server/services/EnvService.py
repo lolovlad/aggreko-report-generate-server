@@ -27,12 +27,13 @@ class EnvService:
         type_users = await self.__env_repo.get_all_type_user()
         return [GetTypeUser.model_validate(obj, from_attributes=True) for obj in type_users]
 
-    async def add_profession(self, name: str, description: str) -> ProfessionORM:
-        entity = ProfessionORM(name=name, description=description)
-        prof = await self.__env_repo.add_prof_user(entity)
-        if prof is None:
-            prof = await self.__env_repo.get_prof_by_name(name)
-        return prof
+    async def add_profession(self, prof: Profession):
+        entity = ProfessionORM()
+        data = prof.model_dump()
+        for i in data:
+            if i != "id":
+                setattr(entity, i, data[i])
+        prof = await self.__env_repo.add(entity)
 
     async def get_profession_user(self) -> list[Profession]:
         prof_users = await self.__env_repo.get_all_prof_user()
@@ -113,3 +114,15 @@ class EnvService:
             raise Exception()
         finally:
             await file.close()
+
+    async def delete_type_blueprint(self, id_type_b: int) -> TypeBlueprint:
+        entity = await self.__env_repo.get_entity(id_type_b, TypeBlueprint)
+        entity.is_delite = True
+        await self.__env_repo.add(entity)
+        return entity
+
+    async def delete_type_equipment_blueprint(self, id_type_equip_b: int) -> TypeEquipmentBlueprint:
+        entity = await self.__env_repo.get_entity(id_type_equip_b, TypeEquipmentBlueprint)
+        entity.is_delite = True
+        await self.__env_repo.add(entity)
+        return entity

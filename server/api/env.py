@@ -59,7 +59,7 @@ async def get_user_profession(service: EnvService = Depends(),
 async def add_profession(prof: Profession,
                          service: EnvService = Depends(),
                          current_user: UserGet = Depends(get_current_user)):
-    prof_users = await service.add_profession(prof.name, prof.description)
+    await service.add_profession(prof)
     return JSONResponse(content={"message": "добавлено"},
                         status_code=status.HTTP_201_CREATED)
 
@@ -104,6 +104,23 @@ async def add_type_blueprint(data: SystemVariablesMixin,
                         status_code=status.HTTP_201_CREATED)
 
 
+@router.delete("/type_blueprint/{id_type_blueprint}", responses={
+    status.HTTP_406_NOT_ACCEPTABLE: {"model": Message},
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": Message}
+})
+@access_control(["super_admin"])
+async def delete_type_blueprint(id_type_blueprint: int,
+                                service: EnvService = Depends(),
+                                current_user: UserGet = Depends(get_current_user)):
+    entity = await service.delete_type_blueprint(id_type_blueprint)
+    if entity:
+        return JSONResponse(status_code=status.HTTP_200_OK,
+                            content={"message": "Удалено"})
+    else:
+        return JSONResponse(content={"message": "ошибка удаление"},
+                            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @router.get("/type_equipment_blueprint", responses={
     status.HTTP_406_NOT_ACCEPTABLE: {"model": Message},
     status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": Message}
@@ -125,6 +142,23 @@ async def add_type_equipment_blueprint(data: SystemVariablesMixin,
     await service.add_type_equipment_blueprint(data)
     return JSONResponse(content={"message": "добавлено"},
                         status_code=status.HTTP_201_CREATED)
+
+
+@router.delete("/type_equipment_blueprint/{id_type_equipment_blueprint}", responses={
+    status.HTTP_406_NOT_ACCEPTABLE: {"model": Message},
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": Message}
+})
+@access_control(["super_admin"])
+async def delete_type_equipment_blueprint(id_type_equipment_blueprint: int,
+                                          service: EnvService = Depends(),
+                                          current_user: UserGet = Depends(get_current_user)):
+    entity = await service.delete_type_equipment_blueprint(id_type_equipment_blueprint)
+    if entity:
+        return JSONResponse(status_code=status.HTTP_200_OK,
+                            content={"message": "Удалено"})
+    else:
+        return JSONResponse(content={"message": "ошибка удаление"},
+                            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.get("/type_device", responses={
