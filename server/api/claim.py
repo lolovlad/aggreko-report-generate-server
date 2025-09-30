@@ -30,10 +30,7 @@ async def get_page_claim(response: Response,
                          current_user: UserGet = Depends(get_current_user),
                          service: ClaimService = Depends()):
     service.count_item = per_item_page
-    if current_user.type.name == "user":
-        count_page = await service.get_count_page(current_user.uuid)
-    else:
-        count_page = await service.get_count_page(None)
+    count_page = await service.get_count_page()
     claims = await service.get_page(page, current_user)
 
     response.headers["X-Count-Page"] = str(count_page)

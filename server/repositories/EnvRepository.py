@@ -58,7 +58,7 @@ class EnvRepository:
         return result.scalars().one()
 
     async def get_all_prof_user(self) -> list[Profession]:
-        response = select(Profession)
+        response = select(Profession).where(Profession.is_delite == False)
         result = await self.__session.execute(response)
         return result.scalars().all()
 

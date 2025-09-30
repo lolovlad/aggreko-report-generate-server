@@ -39,7 +39,7 @@ class TypeUser(base, SystemVariablesMixin):
     __tablename__ = "type_user"
 
 
-class Profession(base, SystemVariablesMixin):
+class Profession(base, SystemVariablesMixin, DeleteMixin):
     __tablename__ = "profession"
 
 

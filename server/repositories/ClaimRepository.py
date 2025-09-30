@@ -10,15 +10,13 @@ class ClaimRepository:
     def __init__(self, session: AsyncSession = Depends(get_session)):
         self.__session: AsyncSession = session
 
-    async def count_row(self, id_user: int | None) -> int:
+    async def count_row(self) -> int:
         response = select(func.count(Claim.id))
-        if id_user is not None:
-            response = response.where(Claim.id_user == id_user)
         result = await self.__session.execute(response)
         return result.scalars().first()
 
-    async def get_limit_user(self, id_user: int, start: int, count: int) -> list[Claim]:
-        response = select(Claim).where(Claim.id_user == id_user).offset(start).fetch(count).order_by(Claim.id)
+    async def get_limit_user(self, start: int, count: int) -> list[Claim]:
+        response = select(Claim).offset(start).fetch(count).order_by(Claim.id)
         result = await self.__session.execute(response)
         return result.scalars().all()
 

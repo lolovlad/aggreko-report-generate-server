@@ -40,8 +40,13 @@ class EnvService:
         return [Profession.model_validate(obj, from_attributes=True) for obj in prof_users]
 
     async def delete_prof(self, id_prof: int) -> bool:
-        is_del = await self.__env_repo.delete_prof(id_prof)
-        return is_del
+        try:
+            prof = await self.__env_repo.get_entity(id_prof, ProfessionORM)
+            prof.is_delite = True
+            await self.__env_repo.add(prof)
+            return True
+        except:
+            return False
 
     async def get_type_blueprint(self) -> list[TypeBlueprintModel]:
         type_blueprint = await self.__env_repo.get_all_type_blueprint()

@@ -81,13 +81,8 @@ class ClaimService:
             "year": year
         }
 
-    async def get_count_page(self, uuid_user: str | None) -> int:
-        id_user = None
-        if uuid_user:
-            user = await self.__user_repo.get_user_by_uuid(uuid_user)
-            id_user = user.id
-
-        count_row = await self.__claim_repo.count_row(id_user)
+    async def get_count_page(self) -> int:
+        count_row = await self.__claim_repo.count_row()
         sub_page = 0
         if count_row % self.__count_item > 0:
             sub_page += 1
@@ -101,8 +96,7 @@ class ClaimService:
     async def get_page(self, num_page: int, user: UserGet) -> list[GetClaim]:
         start = (num_page - 1) * self.__count_item
         if user.type.system_name == "user":
-            user = await self.__user_repo.get_user_by_uuid(user.uuid)
-            entities = await self.__claim_repo.get_limit_user(user.id, start, self.__count_item)
+            entities = await self.__claim_repo.get_limit_user(start, self.__count_item)
         else:
             entities = await self.__claim_repo.get_limit_admin(start, self.__count_item)
         claims = [GetClaim.model_validate(entity, from_attributes=True) for entity in entities]

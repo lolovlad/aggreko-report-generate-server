@@ -36,10 +36,7 @@ class DocxFile(File):
         return paragraph
 
     def __generate_key(self, id_table: int, row_index: int, cell_index: int) -> str:
-        rand_a = choice(ascii_lowercase)
-        rand_b = choice(ascii_lowercase)
-        rand_c = choice(ascii_lowercase)
-        low_name = f"{rand_a}{id_table}_{rand_b}{row_index}_{rand_c}{cell_index}"
+        low_name = f"t{id_table}_r{row_index}_c{cell_index}"
 
         return "{{" + low_name + "}}"
 
