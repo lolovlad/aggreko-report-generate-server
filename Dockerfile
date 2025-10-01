@@ -1,30 +1,35 @@
-# Используем официальный легковесный образ Python 3.11 на базе Alpine
-FROM python:3.12.1-alpine
+# Лёгкий и стабильный образ на базе Debian Slim
+FROM python:3.12-slim
 
-# Устанавливаем системные зависимости (необходимы для некоторых пакетов)
-RUN apk add --no-cache \
+# Устанавливаем системные зависимости (для сборки пакетов Python)
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    musl-dev \
-    libffi-dev \
-    postgresql-dev \
+    libpq-dev \
     libxml2-dev \
     libxslt-dev \
-    && pip install --upgrade pip
+    libffi-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Создаём и переходим в рабочую директорию
+# Обновляем pip и ставим колёсики быстрее
+RUN pip install --upgrade pip setuptools wheel
+
+# Рабочая директория
 WORKDIR /app
 
-# Копируем requirements.txt отдельно для кэширования слоёв
+# Копируем requirements.txt (чтобы слои кэшировались)
 COPY requirements.txt .
 
-# Устанавливаем зависимости с увеличенным таймаутом и российским зеркалом PyPI
+# Устанавливаем Python-зависимости с увеличенным таймаутом и зеркалом PyPI
 RUN pip install --no-cache-dir \
-    --default-timeout=100 \
-    --index-url=https://pypi.mirrors.usto.co/simple/ \
+    --default-timeout=200 \
+    --retries=10 \
+    -i https://mirror.yandex.ru/pypi/simple/ \
     -r requirements.txt
 
-# Копируем остальные файлы проекта
+# Копируем весь проект
 COPY . .
 
-# Возвращаем обязательную строку: даём права на выполнение всем скриптам в /docker/
+# Даем права на выполнение скриптов
 RUN chmod a+x docker/*.sh
+
