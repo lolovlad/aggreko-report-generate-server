@@ -38,8 +38,11 @@ class BuilderDocxFile(BuilderFile):
     def merge_to_top_map_data(self, map_data_dop: dict):
         for i in range(len(map_data_dop["list_workers"])):
             image_bytes = map_data_dop["list_workers"][i]["painting"]
-            image_stream = BytesIO(image_bytes)
-            map_data_dop["list_workers"][i]["painting"] = InlineImage(self.__template_path_file, image_stream)
+            if len(image_bytes) > 10:
+                image_stream = BytesIO(image_bytes)
+                map_data_dop["list_workers"][i]["painting"] = InlineImage(self.__template_path_file, image_stream)
+            else:
+                map_data_dop["list_workers"][i]["painting"] = None
 
         for i in range(len(map_data_dop["protocols"])):
             map_data_dop["protocols"][i]["system_table"] = self.__map_data["protocols"][i]

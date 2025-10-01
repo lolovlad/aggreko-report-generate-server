@@ -3,6 +3,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.styles.borders import Border, Side
 from openpyxl.styles import PatternFill
 from openpyxl.cell.cell import MergedCell
+from xlcalculator import ModelCompiler, Model, Evaluator
 
 from .File import File
 from pathlib import Path
@@ -22,6 +23,9 @@ class XlsxFile(File):
         self._file: Workbook = Workbook()
         self.__map_data: FileSchemas = map_data
         self.__active_sheet: Worksheet = None
+
+        self.__evaluator = None
+        self.__model = None
 
         self.__border_style: Border = Border(left=Side(style='thin'),
                                              right=Side(style='thin'),
@@ -44,6 +48,7 @@ class XlsxFile(File):
 
     def read_file(self, data_only: bool = True):
         self._file = load_workbook(self.__buffer, data_only=data_only)
+        self.__init_xlcalculator()
 
     def render(self, schemas: dict):
         pass
@@ -70,7 +75,35 @@ class XlsxFile(File):
         self.__active_sheet = self._file.create_sheet(protocol.name)
 
     def get_cell(self, x: int, y: int):
-        return self.__active_sheet.cell(row=y, column=x)
+        cell = self.__active_sheet.cell(row=y, column=x)
+        return cell
+    
+    def get_cell_value(self, x: int, y: int):
+        cell = self.get_cell(x, y)
+        if cell.data_type == 'f' and cell.value is not None:
+            return self.__evaluate_formula(cell, x, y)
+        return cell.value
+    
+    def __init_xlcalculator(self):
+        self.__buffer.seek(0)
+        compiler = ModelCompiler()
+        self.__model = compiler.read_and_parse_archive(self.__buffer)
+        self.__evaluator = Evaluator(self.__model)
+
+    def __evaluate_formula(self, cell, x: int, y: int):
+        if self.__evaluator is None:
+            return cell.value
+        try:
+            cell_address = self.get_coord_cell(x, y)
+            sheet_name = self.__active_sheet.title
+            result = self.__evaluator.evaluate(f"{sheet_name}!{cell_address}")
+            if hasattr(result, 'value'):
+                return result.value
+            else:
+                return result
+        except Exception as e:
+            print(f"Ошибка вычисления формулы в ячейке {cell_address}: {e}")
+            return cell.value
 
     def create_cell(self, x: int, y: int, text: str):
         try:

@@ -46,8 +46,11 @@ class ClaimService:
         return f"{res}.{extend}"
 
     async def __get_img(self, file_key: str) -> bytes:
-        t = await self.__buket_user_repo.get_file(file_key)
-        return t
+        try:
+            t = await self.__buket_user_repo.get_file(file_key)
+            return t
+        except:
+            return b''
 
     @property
     def count_item(self) -> int:
