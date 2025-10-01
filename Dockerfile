@@ -24,7 +24,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir \
     --default-timeout=200 \
     --retries=10 \
-    -i https://mirror.yandex.ru/pypi/simple/ \
     -r requirements.txt
 
 # Копируем весь проект
